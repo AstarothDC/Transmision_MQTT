@@ -5,7 +5,6 @@ electrode1 = ADC(Pin(34))  # GPIO 34
 electrode2 = ADC(Pin(35))  # GPIO 35
 electrode3 = ADC(Pin(32))  # GPIO 32
 
-# Ajuste de resolución
 electrode1.width(ADC.WIDTH_12BIT)
 electrode2.width(ADC.WIDTH_12BIT)
 electrode3.width(ADC.WIDTH_12BIT)

@@ -7,7 +7,7 @@ import config
 mqtt_client = connect_mqtt()
 
 # Simulación de datos
-batch_size = 5  # Cantidad de muestras antes de enviarlas
+batch_size = 5  
 
 simulated_data = []
 
@@ -22,12 +22,12 @@ while True:
     
     simulated_data.append(data)
 
-    # Imprimir datos en la consola (debug)
+    # Imprimir datos
     print(f"Generado: {data}")
 
     # Enviar datos en lotes
     if len(simulated_data) >= batch_size:
         send_mqtt_message(mqtt_client, config.MQTT_TOPIC, simulated_data)
-        simulated_data.clear()  # Limpiar lista después de enviar
+        simulated_data.clear()  # Limpiar lista 
 
-    time.sleep(2)  # Simulación cada 2 segundos
+    time.sleep(2)  
