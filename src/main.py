@@ -3,7 +3,7 @@ import random
 from mqtt_client import connect_mqtt, send_mqtt_message
 import config
 
-# Conectar al broker MQTT gratuito
+# broker MQTT gratuito
 mqtt_client = connect_mqtt()
 
 # Simulación de datos

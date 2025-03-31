@@ -1,4 +1,4 @@
-from umqtt.simple import MQTTClient
+from lib.simple import MQTTClient
 import config
 import json
 
