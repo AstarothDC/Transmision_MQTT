@@ -3,10 +3,12 @@ import random
 import os
 import machine
 from adc_reader import read_adc
+from Single_señal import read_adc_sigle
 from mqtt_client import connect_mqtt, send_mqtt_message
 from storage import save_data  
 import config
 from ds3231 import DS3231  
+from collections import OrderedDict
 
 # Conexión con el broker MQTT
 mqtt_client = connect_mqtt()
@@ -56,13 +58,15 @@ def save_data_to_sd(data_batch):
         print("No se puede escribir en la SD porque no está montada.")
 
 while True:
-    # Simular datos de 3 electrodos con la hora obtenida desde el RTC
-    data = {
-        "electrode1": random.randint(300, 800),
-        "electrode2": random.randint(300, 800),
-        "electrode3": random.randint(300, 800),
-        "timestamp": get_current_time()  # hora desde el RTC DS3231
-    }
+    # Leer señal ECG desde el sensor AD8232
+    adc_values = read_adc()
+    timestamp, formatted_time = get_current_time()
+    data = OrderedDict([
+        ("electrode1", adc_values["electrode1"]),
+        ("electrode2", adc_values["electrode2"]),
+        ("electrode3", adc_values["electrode3"]),
+        ("timestamp", (timestamp, formatted_time))
+    ])
     
     simulated_data.append(data)
     mqtt_data_batch.append(data)  # También lo añadimos al lote para MQTT
@@ -75,11 +79,14 @@ while True:
 
     # Enviar datos por MQTT cada 3 minutos
     if time.time() - last_mqtt_send_time >= mqtt_send_interval:
-        if mqtt_data_batch:  # Solo enviar si hay datos acumulados
-            send_mqtt_message(mqtt_client, config.MQTT_TOPIC, mqtt_data_batch)
-            print(f"📡 Datos enviados por MQTT: {len(mqtt_data_batch)} muestras")
-            mqtt_data_batch.clear()  # Vaciar lista después del envío
-            last_mqtt_send_time = time.time()  # Actualizar el tiempo de envío
+        if mqtt_data_batch:
+            try:
+                send_mqtt_message(mqtt_client, config.MQTT_TOPIC, mqtt_data_batch)
+                print(f"📡 Datos enviados por MQTT: {len(mqtt_data_batch)} muestras")
+            except Exception as e:
+                print(f"⚠️ Error al enviar por MQTT: {e}")
+            mqtt_data_batch.clear()
+            last_mqtt_send_time = time.time()
 
-    time.sleep(2)  # Intervalo de tiempo entre mediciones
+    time.sleep(1)  # Intervalo de tiempo entre mediciones
  
